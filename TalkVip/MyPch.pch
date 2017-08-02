@@ -1,0 +1,55 @@
+//
+//  MyPch.pch
+//  TalkVip
+//
+//  Created by SunGuoYan on 17/4/6.
+//  Copyright © 2017年 SunGuoYan. All rights reserved.
+//
+
+#ifndef MyPch_pch
+#define MyPch_pch
+
+#import "Extension.h"
+#define TOKEN @"token"
+#define EMAIL @"email"
+#define PHONE @"phone"
+#define EXTRACT_STATE @"extract_state"
+#define CONTINUOUS_CALL @"continuous_call"
+#define HEADURL @"headurl"
+#define REALNAME @"realname"
+
+#import "AFNetWorking.h"
+#import "NetWorkManager.h"
+#import "MBProgressHUD+MJ.h"
+#import "IndicaterView.h"
+
+#import "CustomerIndicater.h"
+#import "SGYTool.h"
+
+//#import "MBProgressHUD.h"
+#define screenW [UIScreen mainScreen].bounds.size.width
+#define screenH [UIScreen mainScreen].bounds.size.height
+
+//#define baseUrl @"http://c1.dev.talkvip.cn"//油油
+//#define baseUrl_mt @"http://mt.talkvip.cn"//张剑
+//#define baseUrl_mt @"http://mt.dev.talkvip.cn"//小明
+
+//沙箱
+//#define ACCOUNTID @"b6458ae8a4"
+//#define baseUrl @"http://c1.sandbox.talkvip.cn"
+//#define baseUrl_mt @"http://mt.sandbox.talkvip.cn"
+
+
+//正式
+#define ACCOUNTID @"1803c7cadc"
+#define baseUrl @"http://c1.talkvip.cn"
+#define baseUrl_mt @"http://120.52.12.201:81"
+
+//域名指向IP
+//#define baseUrl_mt @"http://mt.talkvip.cn"
+
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#endif /* MyPch_pch */
