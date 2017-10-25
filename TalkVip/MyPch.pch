@@ -15,8 +15,12 @@
 #define PHONE @"phone"
 #define EXTRACT_STATE @"extract_state"
 #define CONTINUOUS_CALL @"continuous_call"
+#define DAYS @"days"
 #define HEADURL @"headurl"
 #define REALNAME @"realname"
+
+#define USERNAME @"username"
+#define PASSWORD @"password"
 
 #import "AFNetWorking.h"
 #import "NetWorkManager.h"

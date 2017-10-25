@@ -58,9 +58,6 @@
     HUD.dimBackground = YES;
     HUD.labelText = @"登录中...";
     
-//    self.agreementa.hidden=YES;
-//    self.agreementb.hidden=YES;
-    
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"用户许可协议"];
     NSRange strRange = {0,[str length]};
     [str setAttributes:@{NSForegroundColorAttributeName:[UIColor whiteColor]} range:strRange];
@@ -180,20 +177,7 @@
         
         NSLog(@"responseObject:%@",responseObject);
         NSLog(@"msg:%@",responseObject[@"msg"]);
-        /*
-         responseObject:{
-         code = 8888;
-         data =     {
-         email = "";
-         phone = 15201667834;
-         realname = kefu4282;
-         token = b937346cda48e8d252aaa5d9975788c5;
-         };
-         msg = success;
-         result = success;
-         }
-         2017-05-25 11:49:42.413 TalkVip[1600:532919] msg:success
-         */
+        
         //还是需要的 登录失败的时候需要
         if ([responseObject[@"result"] isEqualToString:@"fail"]) {
             [MBProgressHUD showError:responseObject[@"msg"]];
@@ -210,12 +194,17 @@
             NSString *continuous_call=responseObject[@"data"][@"continuous_call"];
             NSString *headurl=[NSString stringWithFormat:@"%@",responseObject[@"data"][@"headurl"]];
             NSString *realname=responseObject[@"data"][@"realname"];
+            NSString *days=responseObject[@"data"][@"days"];
             
             [NSUserDefaults setObject:token ForKey:TOKEN];
             [NSUserDefaults setObject:email ForKey:EMAIL];
             [NSUserDefaults setObject:phone ForKey:PHONE];
             [NSUserDefaults setObject:extract_state ForKey:EXTRACT_STATE];
             [NSUserDefaults setObject:continuous_call ForKey:CONTINUOUS_CALL];
+            [NSUserDefaults setObject:days ForKey:DAYS];
+            
+            [NSUserDefaults setObject:name ForKey:USERNAME];
+            [NSUserDefaults setObject:word ForKey:PASSWORD];
             
             if (headurl!=nil) {
                 if (![headurl isEqualToString:@"<null>"]) {

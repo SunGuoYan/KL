@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		040B45361F4AAEAA00966128 /* BeforeVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 040B45351F4AAEAA00966128 /* BeforeVC.m */; };
+		045E0D661F5CFA080038765B /* WarnningVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 045E0D651F5CFA080038765B /* WarnningVC.m */; };
 		586176FC6ED063BAF064E1A6 /* libPods-TalkVip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A8468AF9646808AD7FFB9B4C /* libPods-TalkVip.a */; };
 		F11922991F1767D100BBF609 /* CheckIconVC.m in Sources */ = {isa = PBXBuildFile; fileRef = F11922981F1767D100BBF609 /* CheckIconVC.m */; };
 		F11922A41F176E0E00BBF609 /* RSKImageCropViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F119229D1F176E0E00BBF609 /* RSKImageCropViewController.m */; };
@@ -92,6 +94,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		040B45341F4AAEAA00966128 /* BeforeVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BeforeVC.h; sourceTree = "<group>"; };
+		040B45351F4AAEAA00966128 /* BeforeVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BeforeVC.m; sourceTree = "<group>"; };
+		045E0D641F5CFA080038765B /* WarnningVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WarnningVC.h; sourceTree = "<group>"; };
+		045E0D651F5CFA080038765B /* WarnningVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WarnningVC.m; sourceTree = "<group>"; };
 		75CD9C13F6E0C643D869A7F1 /* Pods-TalkVip.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TalkVip.debug.xcconfig"; path = "Pods/Target Support Files/Pods-TalkVip/Pods-TalkVip.debug.xcconfig"; sourceTree = "<group>"; };
 		A8468AF9646808AD7FFB9B4C /* libPods-TalkVip.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-TalkVip.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5B90EB71A607D011CA063B4 /* Pods-TalkVip.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TalkVip.release.xcconfig"; path = "Pods/Target Support Files/Pods-TalkVip/Pods-TalkVip.release.xcconfig"; sourceTree = "<group>"; };
@@ -618,6 +624,8 @@
 			children = (
 				F135341A1E7A8E7B00C08D71 /* MainVC.h */,
 				F135341B1E7A8E7B00C08D71 /* MainVC.m */,
+				045E0D641F5CFA080038765B /* WarnningVC.h */,
+				045E0D651F5CFA080038765B /* WarnningVC.m */,
 			);
 			name = MainVC;
 			sourceTree = "<group>";
@@ -846,6 +854,8 @@
 				F1FFA22C1E9F287C00480475 /* AddRemarksAfterCallVC.m */,
 				F1EAEDF41EA8877600A3565F /* AddRemarksBeforeCallVC.h */,
 				F1EAEDF51EA8877600A3565F /* AddRemarksBeforeCallVC.m */,
+				040B45341F4AAEAA00966128 /* BeforeVC.h */,
+				040B45351F4AAEAA00966128 /* BeforeVC.m */,
 			);
 			name = AddRemarks;
 			sourceTree = "<group>";
@@ -968,9 +978,12 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-TalkVip/Pods-TalkVip-resources.sh",
+				"${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -983,13 +996,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TalkVip-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		B6F3FF72483A6FE64EE54E36 /* [CP] Embed Pods Frameworks */ = {
@@ -1031,8 +1047,10 @@
 				F1FFA21F1E9C8E9E00480475 /* AboutVC.m in Sources */,
 				F11922A51F176E0E00BBF609 /* RSKImageScrollView.m in Sources */,
 				F1E2F1261F21A70D008E1F63 /* SGYTableView.m in Sources */,
+				040B45361F4AAEAA00966128 /* BeforeVC.m in Sources */,
 				F179EEE71E95D31900206CCF /* UIView+Frame.m in Sources */,
 				F179EEE31E95D31900206CCF /* UIDevice+SLExtension.m in Sources */,
+				045E0D661F5CFA080038765B /* WarnningVC.m in Sources */,
 				F1C51A9C1E7CC4F100845054 /* NSString+Base64.m in Sources */,
 				F179EEE21E95D31900206CCF /* UIColor+Extension.m in Sources */,
 				F1FFA2231E9CBA2C00480475 /* CustomNormalHeader.m in Sources */,

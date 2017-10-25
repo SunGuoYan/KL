@@ -11,6 +11,9 @@
 #import "MainVC.h"
 #import "LoginVC.h"
 #import "UIImageView+WebCache.h"
+
+#import "Growing.h"
+#import "UMMobClick/MobClick.h"
 @interface AppDelegate ()
 {
     BOOL isNetwork;
@@ -61,7 +64,24 @@
     
 //    [self setLauncherImage];
     
+    //集成GrowingIO分析统计
+    [Growing startWithAccountId:@"b54d0f15cdd9a693"];
+    
+    //集成友盟统计
+    UMConfigInstance.appKey = @"59e70968c62dca2f0a000afd";
+    UMConfigInstance.channelId = @"App Store";
+//    UMConfigInstance.ChannelId = @"App Store";
+    [MobClick startWithConfigure:UMConfigInstance];//配置以上参数后调用此方法初始化SDK！
+    
     return YES;
+}
+-(BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options{
+    // 请务必确保该函数被调用
+    if ([Growing handleUrl:url])
+    {
+        return YES;
+    }
+    return NO;
 }
 -(void)setLauncherImage{
     

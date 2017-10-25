@@ -20,6 +20,7 @@
 #import "AddRemarksAfterCallVC.h"
 
 #import "CustomerIndicater.h"
+#import "BeforeVC.h"
 @interface RemarksDetailVC ()<UITableViewDataSource,UITableViewDelegate>
 {
     HBRSAHandler* _handler;
@@ -35,10 +36,6 @@
 @property (weak, nonatomic) IBOutlet UIButton *dialBtn;
 
 @property (weak, nonatomic) IBOutlet UIImageView *emptyV;
-
-
-
-
 
 @property(nonatomic,strong)NSMutableArray *dataArray;
 
@@ -67,6 +64,7 @@
     //出去界面的时候关闭监听
     self.callCenter=nil;
 }
+
 #pragma mark --- viewWillAppear
 //1.进来的时候 设置导航栏透明
 //注意别写在viewDidLoad里面，push到下个界面，pop回来的时候不执行，
@@ -88,7 +86,6 @@
 -(void)configTitleLab{
     
     self.accountID.text=self.model.id_str;
-    self.telNumber.text=self.model.mobile;
     self.descriptionLab.text=self.model.name;
     self.stateLab.text=self.model.type;
     if ([self.model.type isEqualToString:@"重点"]) {
@@ -98,6 +95,8 @@
 
 #pragma mark --- getNetData
 -(void)getNetData{
+    [self.dataArray removeAllObjects];
+    
     NSString *api=@"/Comment/getHistoryNotes";
     NSString *urlStr=[NSString stringWithFormat:@"%@%@",baseUrl_mt,api];
     
@@ -126,17 +125,14 @@
         if ([responseObject[@"result"] isEqualToString:@"success"]) {
             
             NSString *id_Str=   responseObject[@"data"][@"info"][@"id"];
-            NSString *mobile=   responseObject[@"data"][@"info"][@"mobile"];
             NSString *name=     responseObject[@"data"][@"info"][@"name"];
-//            NSString *sourceid= responseObject[@"data"][@"info"][@"sourceid"];
             NSString *status=   responseObject[@"data"][@"info"][@"status"];
             
             //未拨打
-            NSArray *stateArray=@[@"未拨打",@"重点",@"无意愿",@"待跟进",@"未接通",@"已提取"];
-            NSString *currentState=stateArray[status.integerValue];
+            NSArray *stateArr=@[@"未联系",@"重点",@"无意愿",@"有意愿"];
+            NSString *currentState=stateArr[status.integerValue];
             
             self.accountID.text=id_Str;
-            self.telNumber.text=mobile;
             self.descriptionLab.text=name;
             self.stateLab.text=currentState;
             if ([currentState isEqualToString:@"重点"]) {
@@ -168,9 +164,6 @@
         [MBProgressHUD showError:@"无可用网络，请连接网络后重试"];
         CustomerIndicater *c=(CustomerIndicater *)[[UIApplication sharedApplication].keyWindow viewWithTag:100];
         [c removeFromSuperview];
-        
-        NSLog(@"error:%@",error);
-        
     }];
 }
 #pragma mark --- /***  viewDidLoad ***/
@@ -192,7 +185,7 @@
     self.table.dataSource=self;
     self.table.separatorStyle=UITableViewCellSeparatorStyleNone;
     
-     self.emptyV.hidden=YES;
+    self.emptyV.hidden=YES;
     
     //加载动画
 //    [self addIndicaterView];
@@ -423,10 +416,9 @@
         UIStoryboard *sb=[UIStoryboard storyboardWithName:@"My" bundle:nil];
         AddRemarksAfterCallVC *vc=[sb instantiateViewControllerWithIdentifier:NSStringFromClass([AddRemarksAfterCallVC class])];
         vc.block=^(NSString *current){
-            self.stateLab.text=current;
-            
+            //这里其实不需要block回调，viewWillAppear里面有刷新
+//            self.stateLab.text=current;
 //            [self.dataArray removeAllObjects];
-//            //请求数据
 //            [self getNetData];
         };
         vc.dataArray=dataArray;
@@ -438,6 +430,30 @@
 }
 #pragma mark --- 点击 右上角备注按钮(拨打之前备注)
 - (IBAction)beizhu:(UIButton *)sender {
+    
+//    [self gotoremark];
+    
+    [self gotoremarkWithTag];
+    
+}
+-(void)gotoremarkWithTag{
+    UIStoryboard *sb=[UIStoryboard storyboardWithName:@"My" bundle:nil];
+    
+    BeforeVC *vc=[sb instantiateViewControllerWithIdentifier:NSStringFromClass([BeforeVC class])];
+    vc.accountID_str=self.accountID.text;
+    vc.descriptionLab_str=self.descriptionLab.text;
+    //点击确认的回调
+    vc.block=^(NSString *currentState){
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            self.stateLab.text=currentState;
+        });
+    };
+    
+    [self.navigationController pushViewController:vc animated:YES];
+}
+-(void)gotoremark{
     UIStoryboard *sb=[UIStoryboard storyboardWithName:@"My" bundle:nil];
     
     AddRemarksBeforeCallVC *vc=[sb instantiateViewControllerWithIdentifier:NSStringFromClass([AddRemarksBeforeCallVC class])];

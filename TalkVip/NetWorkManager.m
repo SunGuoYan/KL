@@ -29,23 +29,6 @@
     NSString *token=[NSUserDefaults getObjectForKey:TOKEN];
     NSString *value=[NSString stringWithFormat:@"Bearer %@",token];
     [_operation.requestSerializer setValue:value forHTTPHeaderField:@"Authorization"];
-    
-    /*
-    [_operation GET:urlStr parameters:para progress:^(NSProgress * _Nonnull downloadProgress) {
-        
-    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        
-        if (successBlock) {
-            successBlock(responseObject);
-        }
-        
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        
-        if (failureBlock) {
-            failureBlock(error);
-        }
-    }];
-    */
     [_operation POST:urlStr parameters:para progress:^(NSProgress * _Nonnull uploadProgress) {
         
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {

@@ -12,7 +12,7 @@
 
 @property(nonatomic,copy)NSString *id_str;
 @property(nonatomic,copy)NSString *inputtime;
-@property(nonatomic,copy)NSString *mobile;
+//@property(nonatomic,copy)NSString *mobile;
 @property(nonatomic,copy)NSString *name;
 @property(nonatomic,copy)NSString *sourceid;
 

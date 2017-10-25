@@ -9,62 +9,54 @@
 #import "MainVC.h"
 #import "MyCell.h"
 #import "DXPopover.h"
-
 #import "MenuView.h"
 #import "LeftMenuViewDemo.h"
-
 #import "SettingVC.h"
 #import "AccountInfoVC.h"
 #import "WillingVC.h"
-
 #import "RemarksDetailVC.h"
-
 #import "MJRefresh.h"
 #import "CustomNormalHeader.h"
 #import "CustomerGifHeader.h"
 #import "CustomerGifFooter.h"
 #import "CustomerBackGifFooter.h"
 
-
 //监听电话
 #import <CoreTelephony/CTCallCenter.h>
 #import <CoreTelephony/CTCall.h>
-
 #import "AddRemarksAfterCallVC.h"
-
 #import "ListModel.h"
 #import "NetWorkManager.h"
-
-
 #import "UIImageView+WebCache.h"
-
 #import "LoginVC.h"
 
 //加密
 #import "HBRSAHandler.h"
-
 #import "CheckIconVC.h"
 #import "SGYTableView.h"
+#import "WarnningVC.h"
 
+#import "UMMobClick/MobClick.h"
 
-//1.未拨打
+//1.未联系
 NSString *API_serviceNotCall_1=@"/Callphone/serviceNotCall";
-//2.待跟进
-NSString *API_serviceFollowUp_2=@"/Callphone/serviceFollowUp";
-//3.未接通
-NSString *API_serviceNotThrough_3=@"/Callphone/serviceNotThrough";
+//2.重点 待跟进 /Callphone/serviceFollowUp
+NSString *API_serviceFollowUp_2=@"/Callphone/serviceFocusOn";
+//3.有意愿 未接通 /Callphone/serviceNotThrough
+NSString *API_serviceNotThrough_3=@"/Callphone/serviceFollowUp";
 //4.无意愿
 NSString *API_serviceNoDesirel_4=@"/Callphone/serviceNoDesire";
-//5.重点
+
+
+//5.重点 取消
 NSString *API_serviceFocusOn_5=@"/Callphone/serviceFocusOn";
-//6.已提取
+//6.已提取 取消
 NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
 
-#define lightGray [UIColor colorWithRed:0.93 green:0.93 blue:0.93 alpha:1]
 #define cellH 70
 #define btnH 42 //小btn的高度
 #define sliderY 38
-#define btnW (414/6.0) //小btn的宽度 414 是plus的宽度 以最宽为基准
+#define btnW ((screenW-5*10)/4.0) //小btn的宽度 414 是plus的宽度 以最宽为基准
 #define bannerH 44 //banner的高度
 #define btnDefaultColor [UIColor colorWithHexString:@"#75879d"]
 #define btnSelectColor [UIColor colorWithHexString:@"#5a89ff"]
@@ -80,13 +72,6 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     UIImageView *emptyImageV_4;//空白页面
     UIImageView *emptyImageV_5;//空白页面
     UIImageView *emptyImageV_6;//空白页面
-    
-    UIImageView *indicatorV_1;
-    UIImageView *indicatorV_2;
-    UIImageView *indicatorV_3;
-    UIImageView *indicatorV_4;
-    UIImageView *indicatorV_5;
-    UIImageView *indicatorV_6;
     
      MBProgressHUD *HUD;
     
@@ -146,6 +131,8 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
     self.callCenter=nil;
+    
+    [MobClick endLogPageView:@"PageOne"];
 }
 
 #pragma mark ---/*** viewWillAppear ***/
@@ -156,16 +143,22 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     [self getData];
     //创建 侧滑的View
     [self createLeftMenu];
+    
+    //("PageOne"为页面名称，可自定义)
+    [MobClick beginLogPageView:@"PageOne"];
 }
 
 -(void)addLine{
     UIImageView *line=[UIImageView imageWithFrame:CGRectMake(0, 0, screenW, bannerH) Image:@"Projection" BgColor:nil];
     [self.view addSubview:line];
+    
+    
 }
 
 -(void)leftbtnClick{
     [self.menu show];
 }
+
 
 #pragma mark --- /***   viewDidLoad   ***/
 - (void)viewDidLoad {
@@ -193,22 +186,17 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     //初始化导航栏
     [self initialSystemUI];
     
-    self.automaticallyAdjustsScrollViewInsets=NO;
-    
-    //table的数据源
-//    self.configs = @[@"未拨打",@"待跟进",@"未接通 ",@"无意愿 ",@"已提取",@"重点"];
-    
     //1 隐藏 0 显示
     _extract_state=[NSUserDefaults getObjectForKey:EXTRACT_STATE];
     
     if (_extract_state.integerValue == 0) {
         
         self.configs = @[@"未拨打",@"待跟进",@"未接通 ",@"无意愿 ",@"重点",@"已提取"];
-//        self.configs = @[@"未拨打",@"重点",@"未接通 ",@"无意愿 ",@"已提取"];
-    
+        
     }else if (_extract_state.integerValue == 1){
-        self.configs = @[@"未拨打",@"待跟进",@"未接通 ",@"无意愿 ",@"重点"];
-//        self.configs = @[@"未拨打",@"重点",@"未接通 ",@"无意愿 "];
+
+        self.configs = @[@"未联系",@"重点",@"有意愿 ",@"无意愿 "];
+//        self.configs = @[@"未拨打",@"待跟进",@"未接通 ",@"无意愿 ",@"重点"];
     }
     //banner下面的阴影线
     [self addLine];
@@ -225,10 +213,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     //4 创建 index 底部的index 进度条
     [self creatIndexPart];
     
-    //5.创建 6个定位
-    [self createIndicatorV];
-    
-    //初始化 index 隐藏
+    //5 初始化 index 隐藏
     [self setIndicatorHidden:YES];
     
     //6.创建 6个空白图片
@@ -243,6 +228,8 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     //如果设置此属性则当前的view置于后台
     HUD.dimBackground = YES;
     HUD.labelText = @"拨打中...";
+    
+    [self setWarnning];
 }
 
 -(void)addIndicaterView{
@@ -280,42 +267,42 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             });
             
             [SGYTool setImageV:@[emptyImageV_1,emptyImageV_2,emptyImageV_3,emptyImageV_4,emptyImageV_5,emptyImageV_6] withImageName:@"no_wifi"];
-            
-            [SGYTool setViewHidden:@[indicatorV_1,indicatorV_2,indicatorV_3,indicatorV_4,indicatorV_5,indicatorV_6] withState:NO];
         }
     }];
 }
-
+-(void)backToLogin{
+    UIAlertController *alertVC=[UIAlertController alertControllerWithTitle:@"提示" message:@"账号已过期，请重新登录" preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *actionA=[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+    }];
+    
+    UIAlertAction *actionB=[UIAlertAction actionWithTitle:@"登录" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        UIStoryboard *sb_My = [UIStoryboard storyboardWithName:@"My" bundle:nil];
+        LoginVC *vc=[sb_My instantiateViewControllerWithIdentifier:NSStringFromClass([LoginVC class])];
+        UINavigationController *nvc=[[UINavigationController alloc]initWithRootViewController:vc];
+        
+        
+        [UIApplication sharedApplication].keyWindow.rootViewController = nvc;
+        
+        //刷新Window视图
+        [[UIApplication sharedApplication].keyWindow makeKeyAndVisible];
+        
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+        [NSUserDefaults removeObjectForKey:@"isLogin"];
+        
+    }];
+    
+    [alertVC addAction:actionA];
+    [alertVC addAction:actionB];
+    [self presentViewController:alertVC animated:YES completion:nil];
+}
 -(void)analysisWith:(NSDictionary *)responseObject andDataArray:(NSMutableArray *)array andFreshWithTable:(UITableView *)table andMark:(NSString *)num{
     //
     if ([responseObject[@"code"] isEqualToString:@"1006"]||[responseObject[@"code"] isEqualToString:@"1009"]) {
         
-        UIAlertController *alertVC=[UIAlertController alertControllerWithTitle:@"提示" message:@"账号已过期，请重新登录" preferredStyle:UIAlertControllerStyleAlert];
-        
-        UIAlertAction *actionA=[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            
-        }];
-        
-        UIAlertAction *actionB=[UIAlertAction actionWithTitle:@"登录" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            UIStoryboard *sb_My = [UIStoryboard storyboardWithName:@"My" bundle:nil];
-            LoginVC *vc=[sb_My instantiateViewControllerWithIdentifier:NSStringFromClass([LoginVC class])];
-            UINavigationController *nvc=[[UINavigationController alloc]initWithRootViewController:vc];
-
-            
-            [UIApplication sharedApplication].keyWindow.rootViewController = nvc;
-            
-            //刷新Window视图
-            [[UIApplication sharedApplication].keyWindow makeKeyAndVisible];
-            
-            [self.navigationController popToRootViewControllerAnimated:YES];
-            
-            [NSUserDefaults removeObjectForKey:@"isLogin"];
-            
-        }];
-        
-        [alertVC addAction:actionA];
-        [alertVC addAction:actionB];
-        [self presentViewController:alertVC animated:YES completion:nil];
+        [self backToLogin];
     }
     
     if ([responseObject[@"msg"] isEqualToString:@"success"]) {
@@ -325,22 +312,22 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
         if (count.integerValue>0) {
             switch (num.integerValue) {
                 case 1:
-                    [SGYTool setViewHidden:@[emptyImageV_1,indicatorV_1] withState:YES];
+                    [SGYTool setViewHidden:@[emptyImageV_1] withState:YES];
                     break;
                 case 2:
-                    [SGYTool setViewHidden:@[emptyImageV_2,indicatorV_2] withState:YES];
+                    [SGYTool setViewHidden:@[emptyImageV_2] withState:YES];
                     break;
                 case 3:
-                    [SGYTool setViewHidden:@[emptyImageV_3,indicatorV_3] withState:YES];
+                    [SGYTool setViewHidden:@[emptyImageV_3] withState:YES];
                     break;
                 case 4:
-                    [SGYTool setViewHidden:@[emptyImageV_4,indicatorV_4] withState:YES];
+                    [SGYTool setViewHidden:@[emptyImageV_4] withState:YES];
                     break;
                 case 5:
-                    [SGYTool setViewHidden:@[emptyImageV_5,indicatorV_5] withState:YES];
+                    [SGYTool setViewHidden:@[emptyImageV_5] withState:YES];
                     break;
                 case 6:
-                    [SGYTool setViewHidden:@[emptyImageV_6,indicatorV_6] withState:YES];
+                    [SGYTool setViewHidden:@[emptyImageV_6] withState:YES];
                     break;
                 default:
                     break;
@@ -349,22 +336,22 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             UIImage *image=[UIImage imageNamed:@"empty_list"];
             switch (num.integerValue) {
                 case 1:
-                    [self setImageV:emptyImageV_1 with:image andHide:indicatorV_1];
+                    [self setImageV:emptyImageV_1 with:image andHide:nil];
                     break;
                 case 2:
-                    [self setImageV:emptyImageV_2 with:image andHide:indicatorV_2];
+                    [self setImageV:emptyImageV_2 with:image andHide:nil];
                     break;
                 case 3:
-                    [self setImageV:emptyImageV_3 with:image andHide:indicatorV_3];
+                    [self setImageV:emptyImageV_3 with:image andHide:nil];
                     break;
                 case 4:
-                    [self setImageV:emptyImageV_4 with:image andHide:indicatorV_4];
+                    [self setImageV:emptyImageV_4 with:image andHide:nil];
                     break;
                 case 5:
-                   [self setImageV:emptyImageV_5 with:image andHide:indicatorV_5];
+                   [self setImageV:emptyImageV_5 with:image andHide:nil];
                     break;
                 case 6:
-                    [self setImageV:emptyImageV_6 with:image andHide:indicatorV_6];
+                    [self setImageV:emptyImageV_6 with:image andHide:nil];
                     break;
                 default:
                     break;
@@ -380,7 +367,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
                 ListModel *model=[[ListModel alloc] init];
                 model.id_str=dic[@"id"];
                 model.inputtime=dic[@"inputtime"];
-                model.mobile=dic[@"mobile"];
+//                model.mobile=dic[@"mobile"];
                 model.name=dic[@"name"];
                 model.sourceid=dic[@"sourceid"];
                 model.notifyURL=notifyURL;
@@ -400,7 +387,10 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
 -(void)setImageV:(UIImageView *)imageV with:(UIImage *)image andHide:(UIView *)A{
     imageV.image=image;
     imageV.hidden=NO;
-    A.hidden=YES;
+    if (A) {
+        A.hidden=YES;
+    }
+    
 }
 
 -(void)creatIndexPart{
@@ -437,33 +427,6 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     self.progressView.transform = transform;
     
     [bg addSubview:self.progressView];
-}
-
--(void)createIndicatorV{
-    UIImage *image=[UIImage imageNamed:@"indicater"];
-    CGFloat W=image.size.width;
-    CGFloat H=image.size.height;
-    
-    indicatorV_1=[UIImageView imageWithFrame:CGRectMake(12.5, cellH/2-5, W,H) Image:@"indicater" BgColor:nil];
-    [self.scrollb addSubview:indicatorV_1];
-    
-    indicatorV_2=[UIImageView imageWithFrame:CGRectMake(12.5+screenW, cellH/2-5, W,H) Image:@"indicater" BgColor:nil];
-    [self.scrollb addSubview:indicatorV_2];
-    
-    indicatorV_3=[UIImageView imageWithFrame:CGRectMake(12.5+screenW*2, cellH/2-5, W,H) Image:@"indicater" BgColor:nil];
-    [self.scrollb addSubview:indicatorV_3];
-    
-    indicatorV_4=[UIImageView imageWithFrame:CGRectMake(12.5+screenW*3, cellH/2-5, W,H) Image:@"indicater" BgColor:nil];
-    [self.scrollb addSubview:indicatorV_4];
-    
-    indicatorV_5=[UIImageView imageWithFrame:CGRectMake(12.5+screenW*4, cellH/2-5, W,H) Image:@"indicater" BgColor:nil];
-    [self.scrollb addSubview:indicatorV_5];
-    
-    indicatorV_6=[UIImageView imageWithFrame:CGRectMake(12.5+screenW*5,cellH/2-5, W,H) Image:@"indicater" BgColor:nil];
-    [self.scrollb addSubview:indicatorV_6];
-    
-    
-    [SGYTool setViewHidden:@[indicatorV_1,indicatorV_2,indicatorV_3,indicatorV_4,indicatorV_5,indicatorV_6] withState:YES];
 }
 
 #pragma mark --- 6个table的创建
@@ -827,7 +790,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             if (self.dataArray1.count>=indexPath.row) {
                 ListModel *model=self.dataArray1[indexPath.row];
                 cell.labb.text=model.id_str;
-                cell.labc.text=model.mobile;
+//                cell.labc.text=model.mobile;
                 cell.labd.text=model.name;
                 
                 //cell右侧的点击事件
@@ -852,7 +815,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             if (self.dataArray2.count>=indexPath.row) {
                 ListModel *model=self.dataArray2[indexPath.row];
                 cell.labb.text=model.id_str;
-                cell.labc.text=model.mobile;
+//                cell.labc.text=model.mobile;
                 cell.labd.text=model.name;
                 cell.index=indexPath.row;
                 cell.block = ^(NSInteger index)
@@ -873,7 +836,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             if (self.dataArray3.count>=indexPath.row) {
                 ListModel *model=self.dataArray3[indexPath.row];
                 cell.labb.text=model.id_str;
-                cell.labc.text=model.mobile;
+//                cell.labc.text=model.mobile;
                 cell.labd.text=model.name;
                 cell.index=indexPath.row;
                 cell.block = ^(NSInteger index)
@@ -894,7 +857,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             if (self.dataArray4.count>=indexPath.row) {
                 ListModel *model=self.dataArray4[indexPath.row];
                 cell.labb.text=model.id_str;
-                cell.labc.text=model.mobile;
+//                cell.labc.text=model.mobile;
                 cell.labd.text=model.name;
                 
                 cell.index=indexPath.row;
@@ -918,7 +881,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             if (self.dataArray5.count>=indexPath.row) {
                 ListModel *model=self.dataArray5[indexPath.row];
                 cell.labb.text=model.id_str;
-                cell.labc.text=model.mobile;
+//                cell.labc.text=model.mobile;
                 cell.labd.text=model.name;
                 
                 cell.index=indexPath.row;
@@ -941,7 +904,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
             if (self.dataArray6.count>=indexPath.row) {
                 ListModel *model=self.dataArray6[indexPath.row];
                 cell.labb.text=model.id_str;
-                cell.labc.text=model.mobile;
+//                cell.labc.text=model.mobile;
                 cell.labd.text=model.name;
                 
                 cell.index=indexPath.row;
@@ -1084,9 +1047,6 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
                          @"notifyURL":notifyURL,
                          @"remark":@"",
                          @"signInfo":signInfo};
-    NSLog(@"para:%@",para);
-    
-    
     AFHTTPSessionManager *_operation = [AFHTTPSessionManager  manager];
     
     _operation.responseSerializer = [AFHTTPResponseSerializer serializer];
@@ -1267,7 +1227,97 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
 #pragma mark *******************************
 #pragma mark ************ 非重点 ************
 #pragma mark *******************************
-#pragma mark --- table的数据源
+#pragma mark --- 过期提醒VC
+-(void)setWarnning{
+    NSString *username=[NSUserDefaults getObjectForKey:USERNAME];
+    NSString *password=[NSUserDefaults getObjectForKey:PASSWORD];
+    [self loginWithUserName:username andPassWord:password];
+//    NSString *days=[NSUserDefaults getObjectForKey:DAYS];
+//    if (days.integerValue==-1) {
+//        //正常情况
+//    }else{
+//        [self goToWarnningVCWith:days.integerValue];
+//    }
+}
+-(void)loginWithUserName:(NSString *)name andPassWord:(NSString *)word{
+    NSString *api=@"/login/loginOn";
+    NSString *urlStr=[NSString stringWithFormat:@"%@%@",baseUrl_mt,api];
+    //1.
+    NSString *username=name;
+    //2.
+    NSString *password=word;
+    NSDate * nowTime = [NSDate date];
+    NSDateFormatter * formatter = [[NSDateFormatter alloc]init];
+    [formatter setDateFormat:@"YYYYMMddHHmmss"];
+    //3.
+    NSString * timeStamp = [formatter stringFromDate:nowTime];
+    
+    NSString * sign_str=[NSString stringWithFormat:@"%@|%@|%@",username,password,timeStamp];
+    
+    //初始化RSA
+    NSString *publicKeyFilePath = [[NSBundle mainBundle] pathForResource:@"public_key.pem" ofType:nil];
+    
+    NSString *privateKeyFilePath = [[NSBundle mainBundle] pathForResource:@"rsa_private_key.pem" ofType:nil];
+    
+    _handler= [HBRSAHandler new];
+    
+    [_handler importKeyWithType:KeyTypePublic andPath:publicKeyFilePath];
+    [_handler importKeyWithType:KeyTypePrivate andPath:privateKeyFilePath];
+    //加密
+    NSString *sign=[_handler encryptWithPublicKey:sign_str];
+    
+    NSDictionary *para=@{@"sign":sign};
+    
+    AFHTTPSessionManager *_operation = [AFHTTPSessionManager  manager];
+    [_operation.requestSerializer setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    
+    _operation.responseSerializer = [AFHTTPResponseSerializer serializer];
+    _operation.responseSerializer=[AFJSONResponseSerializer serializer];
+    _operation.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/html",@"text/xml",@"text/plain",@"application/json",nil];
+    
+    //增加这几行代码；
+    AFSecurityPolicy *securityPolicy = [[AFSecurityPolicy alloc] init];
+    [securityPolicy setAllowInvalidCertificates:YES];
+    //这里进行设置
+    [_operation setSecurityPolicy:securityPolicy];
+    
+    
+    [_operation POST:urlStr parameters:para progress:^(NSProgress * _Nonnull uploadProgress) {
+        
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        
+        
+        if ([responseObject[@"msg"] isEqualToString:@"success"])
+        {
+            NSString *days=responseObject[@"data"][@"days"];
+            if (days.integerValue==-1) {
+                //正常情况
+            }else{
+                [self goToWarnningVCWith:days.integerValue];
+            }
+        }else if ([responseObject[@"result"] isEqualToString:@"fail"]) {
+            NSString *code=responseObject[@"code"];
+            if (code.integerValue==1033) {
+//             1033   您的账号已过期，请续费后使用~
+                [self backToLogin];
+            }
+        }
+        
+        
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        
+    }];
+}
+-(void)goToWarnningVCWith:(NSInteger)days{
+    UIStoryboard *sb=[UIStoryboard storyboardWithName:@"My" bundle:nil];
+    
+    WarnningVC *vc=[sb instantiateViewControllerWithIdentifier:NSStringFromClass([WarnningVC class])];
+    
+    vc.modalTransitionStyle=UIModalTransitionStyleCrossDissolve;
+    vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+    vc.days=days;
+    [self presentViewController:vc animated:YES completion:nil];
+}
 -(void)goToAddRemarkVCandDataArray:(NSMutableArray *)dataArray andIndex:(NSInteger)index andNum:(NSString *)num{
     //主线程里面更新UI
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -1294,6 +1344,7 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     [self.dataArray4 removeAllObjects];
     [self.dataArray5 removeAllObjects];
     [self.dataArray6 removeAllObjects];
+    
     //1,未拨打
     [self getDataWithAPI:API_serviceNotCall_1 andPage:@"1" andSize:@"20" andDataArray:self.dataArray1 andTableView:self.table1 andMark:@"1"];
     
@@ -1600,6 +1651,8 @@ NSString *API_serviceExtracted_6=@"/Callphone/serviceExtracted";
     return isNetwork;
 }
 -(void)initialSystemUI{
+    self.automaticallyAdjustsScrollViewInsets=NO;
+    
     //设置导航栏背景色
     self.navigationController.navigationBar.barTintColor=[UIColor colorWithHexString:@"4f91ff"];
     
